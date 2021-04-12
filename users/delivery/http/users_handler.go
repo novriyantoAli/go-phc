@@ -26,7 +26,7 @@ func NewHandler(e *echo.Echo, uc domain.UsersUsecase) {
 	// 	SigningKey: []byte(viper.GetString(`server.secret`)),
 	// })
 
-	e.POST("/api/users/login", handler.Login)
+	e.POST("/api/login", handler.Login)
 
 	// group := e.Group("/api/users", isLoggedIn)
 	// group.GET("", handler.Fetch)
