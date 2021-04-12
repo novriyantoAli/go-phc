@@ -1,0 +1,27 @@
+{
+    "server": {
+        "address": ":3000",
+        "secret": "9spYmZ83dRUHlclc"
+    },
+    "database": {
+        "host": "localhost",
+        "port": "9922",
+        "user": "root",
+        "pass": "12345678",
+        "name": "db_phc"
+    },
+    "telegram": {
+        "token": "1317330675:AAFdrJuR2v8Edm-SVb-9spYmZ83dRUHlclc",
+        "register": "daftar",
+        "balance": "saldo",
+        "menu": "menu",
+        "refill": "refill",
+        "customer": "customer",
+        "report": "laporan",
+        "split": "/"
+    },
+    "context": {
+        "timeout": 9000
+    },
+    "debug": true
+}
