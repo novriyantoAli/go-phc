@@ -156,12 +156,16 @@ func (m *mysqlRepository) Find(ctx context.Context, user domain.Users) (res doma
 		args = append(args, *user.Level)
 	}
 
-	resArr, err := m.fetch(ctx, query, args)
+	resArr, err := m.fetch(ctx, query, args...)
 	if err != nil {
 		return domain.Users{}, err
 	}
 
-	return resArr[0], nil
+	if len(resArr) > 0 {
+		return resArr[0], nil
+	}
+
+	return domain.Users{}, domain.ErrBadParamInput
 }
 
 // Update(ctx context.Context, user Users) (res Users, err error)

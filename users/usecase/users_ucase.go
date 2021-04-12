@@ -8,6 +8,7 @@ import (
 	"github.com/novriyantoAli/go-phc/domain"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type usersUsecase struct {
@@ -20,6 +21,47 @@ func NewUsecase(t time.Duration, r domain.UsersRepository) domain.UsersUsecase {
 	return &usersUsecase{Timeout: t, Repository: r}
 }
 
+func hashAndSalt(pwd []byte) string {
+
+	// Use GenerateFromPassword to hash & salt pwd.
+	// MinCost is just an integer constant provided by the bcrypt
+	// package along with DefaultCost & MaxCost.
+	// The cost can be any value you want provided it isn't lower
+	// than the MinCost (4)
+	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
+	if err != nil {
+		logrus.Error(err)
+	}
+	// GenerateFromPassword returns a byte slice so we need to
+	// convert the bytes to a string and return it
+	return string(hash)
+}
+
+func comparePasswords(hashedPwd string, plainPwd []byte) bool {
+	// Since we'll be getting the hashed password from the DB it
+	// will be a string so we'll need to convert it to a byte slice
+	byteHash := []byte(hashedPwd)
+	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+
+	return true
+}
+
+func (uc *usersUsecase) ResetPassword(c context.Context, nik string) (err error) {
+	return domain.ErrBadParamInput
+}
+
+func (uc *usersUsecase) Register(c context.Context, nik string, telegramID string) (res string, err error) {
+	return "", domain.ErrBadParamInput
+}
+
+func (uc *usersUsecase) ImportUsers(c context.Context, nik []string) (err error) {
+	return domain.ErrBadParamInput
+}
+
 // Login ...
 func (uc *usersUsecase) Login(c context.Context, nik string, password string) (res domain.JWTCustomClaims, err error) {
 	ctx, cancel := context.WithTimeout(c, uc.Timeout)
@@ -27,7 +69,6 @@ func (uc *usersUsecase) Login(c context.Context, nik string, password string) (r
 
 	user := domain.Users{}
 	user.NIK = &nik
-	user.Password = &password
 
 	resUser, err := uc.Repository.Find(ctx, user)
 	if err != nil {
@@ -36,7 +77,11 @@ func (uc *usersUsecase) Login(c context.Context, nik string, password string) (r
 	}
 
 	if resUser == (domain.Users{}) {
-		return domain.JWTCustomClaims{}, domain.ErrNotFound
+		return domain.JWTCustomClaims{}, domain.ErrBadParamInput
+	}
+
+	if comparePasswords(*resUser.Password, []byte(password)) == false {
+		return domain.JWTCustomClaims{}, domain.ErrBadParamInput
 	}
 
 	claims := domain.JWTCustomClaims{
@@ -48,7 +93,6 @@ func (uc *usersUsecase) Login(c context.Context, nik string, password string) (r
 		},
 	}
 
-	
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	t, err := token.SignedString([]byte(viper.GetString(`server.secret`)))
