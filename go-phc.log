@@ -7,3 +7,5 @@
 [31mERRO[0m[2021-04-12T23:31:45+08:00]/Volumes/Users/rhein/GolangWorkspace/go-phc/users/delivery/http/users_handler.go:55 github.com/novriyantoAli/go-phc/users/delivery/http.(*usersHandler).Login() Given param is not valid                     
 [31mERRO[0m[2021-04-13T00:12:55+08:00]/Volumes/Users/rhein/GolangWorkspace/go-phc/users/usecase/users_ucase.go:46 github.com/novriyantoAli/go-phc/users/usecase.comparePasswords() crypto/bcrypt: hashedPassword is not the hash of the given password 
 [31mERRO[0m[2021-04-13T00:12:55+08:00]/Volumes/Users/rhein/GolangWorkspace/go-phc/users/delivery/http/users_handler.go:55 github.com/novriyantoAli/go-phc/users/delivery/http.(*usersHandler).Login() Given param is not valid                     
+[31mFATA[0m[2021-04-13T17:54:41+08:00]/Volumes/Users/rhein/GolangWorkspace/go-phc/main.go:80 main.main() dial tcp [::1]:9922: connect: connection refused 
+[31mFATA[0m[2021-04-13T19:10:57+08:00]/Volumes/Users/rhein/GolangWorkspace/go-phc/main.go:80 main.main() dial tcp [::1]:9922: connect: connection refused 
