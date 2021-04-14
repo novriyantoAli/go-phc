@@ -47,6 +47,6 @@ func RunScheduler(){
 	channel := make(ch chan Response)
 	for {
 		go getData(viper.GetString("finger.ip1"), viper.GetString("finger.key"), ch)
-
+		
 	}
 }
