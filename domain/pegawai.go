@@ -1,59 +1,59 @@
 package domain
 
 import (
-	"context"	"time"
+	"context"
+	"time"
 )
 
-
 type Pegawai struct {
-	ID           *int64    `json:"id"`
-	IDKabupaten  *int64    `json:"id_kabupaten"`
-	NIK          *string   `json:"nik"`
-	NamaLengkap  *string   `json:"nama_lengkap"`
-	Callname     *string   `json:"callname"`
-	NKTP         *int64    `json:"nktp"`
-	NOHP         *string   `json:"no_hp"`
-	JenisKelamin *string   `json:"jenis_kelamin"`
-	TempatLahir  *string   `json:"tempat_lahir"`
-	TanggalLahir *time.Time `json:"tanggal_lahir"`
-	Agama *string `json:"agama"`
-	StatusPerkawinan *string `json:"status_perkawinan"`
-	Kewarganegaraan *string `json:"kewarganegaraan"`
-	GolonganDarah *string `json:"golongan_darah"`
-	Bahasa *string `json:"bahasa"`
-	Suku *string `json:"suku"`
-	DaerahAsal *string `json:"daerah_asal"`
-	TanggalMulaiBekerja *time.Time `json:"tanggal_mulai_bekerja"`
-	JabatanSekarang *string `json:"jabatan_sekarang"`
-	Level *string `json:"level"`
-	Divisi *string `json:"divisi"`
-	Departemen *string `json:"departemen"`
-	Seksi *string `json:"seksi"`
-	Bagian *string `json:"bagian"`
-	StatusKaryawan *string `json:"status_karyawan"`
-	TanggalPengangkatan *time.Time `json:"tanggal_pengangkatan"`
-	MasaKerja *int `json:"masa_kerja"`
-	NoRekening *string `json:"no_rekening"`
-	NoBPJSKesehatan *string `json:"no_bpjs_kesehatan"`
-	NoBPJSKetenagakerjaan *string `json:"no_bpjs_ketenagakerjaan"`
-	Kabupaten    Kabupaten `json:"kabupaten"`
-	Keluarga []Keluarga `json:"keluarga"`
-	KontakDarurat []KontakDarurat `json:"kontak_darurat"`
-	RiwayatPendidikan []RiwayatPendidikan `json:"riwayat_pendidikan"`
-	Lokakarya []Lokakarya `json:"lokakarya"`
-	PengalamanKerja []PengalamanKerja `json:"pengalaman_kerja"`
-	RiwayatJabatan []RiwayatJabatan `json:"riwayat_jabatan"`
-	RiwayatPenghargaan []RiwayatPenghargaan `json:"riwayat_penghargaan"`
-	RiwayatTeguran []RiwayatTeguran `json:"riwayat_teguran"`
+	ID                     *int64                   `json:"id"`
+	IDKabupaten            *int64                   `json:"id_kabupaten"`
+	NIK                    *string                  `json:"nik"`
+	NamaLengkap            *string                  `json:"nama_lengkap"`
+	NamaPanggilan          *string                  `json:"nama_panggilan"`
+	NKTP                   *int64                   `json:"nktp"`
+	NOHP                   *string                  `json:"no_hp"`
+	JenisKelamin           *string                  `json:"jenis_kelamin"`
+	TempatLahir            *string                  `json:"tempat_lahir"`
+	TanggalLahir           *time.Time               `json:"tanggal_lahir"`
+	Agama                  *string                  `json:"agama"`
+	StatusPerkawinan       *string                  `json:"status_perkawinan"`
+	Kewarganegaraan        *string                  `json:"kewarganegaraan"`
+	GolonganDarah          *string                  `json:"golongan_darah"`
+	Bahasa                 *string                  `json:"bahasa"`
+	Suku                   *string                  `json:"suku"`
+	DaerahAsal             *string                  `json:"daerah_asal"`
+	TanggalMulaiBekerja    *time.Time               `json:"tanggal_mulai_bekerja"`
+	JabatanSekarang        *string                  `json:"jabatan_sekarang"`
+	Level                  *string                  `json:"level"`
+	Divisi                 *string                  `json:"divisi"`
+	Departemen             *string                  `json:"departemen"`
+	Seksi                  *string                  `json:"seksi"`
+	Bagian                 *string                  `json:"bagian"`
+	StatusKaryawan         *string                  `json:"status_karyawan"`
+	TanggalPengangkatan    *time.Time               `json:"tanggal_pengangkatan"`
+	MasaKerja              *int                     `json:"masa_kerja"`
+	NoRekening             *string                  `json:"no_rekening"`
+	NoBPJSKesehatan        *string                  `json:"no_bpjs_kesehatan"`
+	NoBPJSKetenagakerjaan  *string                  `json:"no_bpjs_ketenagakerjaan"`
+	Kabupaten              Kabupaten                `json:"kabupaten"`
+	Keluarga               []Keluarga               `json:"keluarga"`
+	KontakDarurat          []KontakDarurat          `json:"kontak_darurat"`
+	RiwayatPendidikan      []RiwayatPendidikan      `json:"riwayat_pendidikan"`
+	Lokakarya              []Lokakarya              `json:"lokakarya"`
+	PengalamanKerja        []PengalamanKerja        `json:"pengalaman_kerja"`
+	RiwayatJabatan         []RiwayatJabatan         `json:"riwayat_jabatan"`
+	RiwayatPenghargaan     []RiwayatPenghargaan     `json:"riwayat_penghargaan"`
+	RiwayatTeguran         []RiwayatTeguran         `json:"riwayat_teguran"`
 	RiwayatSuratPeringatan []RiwayatSuratPeringatan `json:"riwayat_surat_peringatan"`
-	RiwayatKehadiran []RiwayatKehadiran `json:"riwayat_kehadiran"`
-	RiwayatCuti []RiwayatCuti `json:"riwayat_cuti"`
+	RiwayatKehadiran       []RiwayatKehadiran       `json:"riwayat_kehadiran"`
+	RiwayatCuti            []RiwayatCuti            `json:"riwayat_cuti"`
 }
 
 type PegawaiRepository interface {
-	Search(ctx context.Context, employee Pegawai) (res []Pegawai, err error)
-	Find(ctx context.Context, employee Pegawai) (res Pegawai, err error)
-	Insert(ctx context.Context, employee *Pegawai) (err error)
-	Update(ctx context.Context, employee Pegawai) (err error)
+	Search(ctx context.Context, pegawai Pegawai) (res []Pegawai, err error)
+	Find(ctx context.Context, pegawai Pegawai) (res Pegawai, err error)
+	Insert(ctx context.Context, pegawai *Pegawai) (err error)
+	Update(ctx context.Context, pegawai Pegawai) (err error)
 	Delete(ctx context.Context, id int64) (err error)
 }

@@ -10,4 +10,5 @@ type Lokakarya struct {
 	TanggalMulai          *time.Time `json:"tanggal_mulai"`
 	TanggalSelesai        *time.Time `json:"tanggal_selesai"`
 	LamaHari              *int       `json:"lama_hari"`
+	CreatedAt             *time.Time `json:"created_at"`
 }
