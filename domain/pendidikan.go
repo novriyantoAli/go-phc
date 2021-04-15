@@ -2,7 +2,7 @@ package domain
 
 import "time"
 
-type RiwayatPendidikan struct {
+type Pendidikan struct {
 	ID                *int64     `json:"id"`
 	IDPegawai         *int64     `json:"id_pegawai"`
 	TingkatPendidikan *string    `json:"tingkat_pendidikan"`

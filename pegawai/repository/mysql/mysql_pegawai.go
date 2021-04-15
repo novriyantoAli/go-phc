@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/novriyantoAli/go-phc/domain"
+	"github.com/sirupsen/logrus"
 )
 
 type mysqlRepository struct {
@@ -71,23 +72,23 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		}
 
 		// row location
-		kabupaten := Kabupaten{}
-		provinsi := Provinsi{}
+		kabupaten := domain.Kabupaten{}
+		provinsi := domain.Provinsi{}
 		err := m.Conn.QueryRowContext(ctx, "SELECT kabupaten.*, provinsi.* FROM kabupaten INNER JOIN provinsi WHERE kabupaten.id_provinsi = provinsi.id WHERE kabupaten.id = ?", *t.IDKabupaten).Scan(
 			&kabupaten.ID,
 			&kabupaten.IDProvinsi,
 			&kabupaten.NamaKabupaten,
+			&kabupaten.CreatedAt,
 			&provinsi.ID,
 			&provinsi.NamaProvinsi,
+			&provinsi.CreatedAt,
 		)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
-		kabupaten.Provinsi = &provinsi
-		res.Kabupaten = &kabupaten
-
-		rowsKabupaten.Close()
+		kabupaten.Provinsi = provinsi
+		t.Kabupaten = &kabupaten
 
 		// row keluarga
 		rowsKeluarga, err := m.Conn.QueryContext(ctx, "SELECT * FROM keluarga WHERE id_pegawai = ?", *t.ID)
@@ -95,9 +96,9 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			logrus.Error(err)
 			return nil, err
 		}
-		keluargas := make([]Keluarga, 0)
+		keluargas := make([]domain.Keluarga, 0)
 		for rowsKeluarga.Next() {
-			kg := Keluarga{}
+			kg := domain.Keluarga{}
 			err := rowsKeluarga.Scan(
 				&kg.ID,
 				&kg.IDPegawai,
@@ -114,7 +115,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			}
 			keluargas = append(keluargas, kg)
 		}
-		res.Keluarga = &keluargas
+		t.Keluarga = keluargas
 		rowsKeluarga.Close()
 
 		// row kontak darurat
@@ -123,9 +124,9 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			logrus.Error(err)
 			return nil, err
 		}
-		kontakdarurats := make([]KontakDarurat, 0)
+		kontakdarurats := make([]domain.KontakDarurat, 0)
 		for rowsKontakDarurat.Next() {
-			kd := KontakDarurat{}
+			kd := domain.KontakDarurat{}
 			err := rowsKontakDarurat.Scan(
 				&kd.ID,
 				&kd.IDPegawai,
@@ -143,19 +144,19 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			}
 			kontakdarurats = append(kontakdarurats, kd)
 		}
-		res.KontakDarurat = &kontakdarurats
+		t.KontakDarurat = kontakdarurats
 		rowsKontakDarurat.Close()
 
 		// row riwayat pendidikan
-		rowsRiwayatPendidikan, err := m.Conn.QueryContext(ctx, "SELECT * FROM riwayat_pendidikan WHERE id_pegawai = ?", *t.ID)
+		rowsPendidikan, err := m.Conn.QueryContext(ctx, "SELECT * FROM pendidikan WHERE id_pegawai = ?", *t.ID)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
-		riwayatpendidikans := make([]RiwayatPendidikan, 0)
-		for rowsRiwayatPendidikan.Next() {
-			rp := RiwayatPendidikan{}
-			err := rowsRiwayatPendidikan.Scan(
+		riwayatpendidikans := make([]domain.Pendidikan, 0)
+		for rowsPendidikan.Next() {
+			rp := domain.Pendidikan{}
+			err := rowsPendidikan.Scan(
 				&rp.ID,
 				&rp.IDPegawai,
 				&rp.TingkatPendidikan,
@@ -171,18 +172,18 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			}
 			riwayatpendidikans = append(riwayatpendidikans, rp)
 		}
-		res.RiwayatPendidikan = &riwayatpendidikans
-		rowsRiwayatPendidikan.Close()
+		t.RiwayatPendidikan = riwayatpendidikans
+		rowsPendidikan.Close()
 
 		// row lokakarya
-		rowsLokakarya, err := m.Conn.QueryContext(ctx, "SELECT * FROM lokakarya WHERE id_pegawai = ?", *t.ID)
+		rowsLokakarya, err := m.Conn.QueryContext(ctx, "SELECT id, id_pegawai, nama_seminar, lokasi_penyelenggaraan, tanggal_mulai, tanggal_selesai, DATEDIFF(tanggal_selesai, tanggal_mulai) AS lama_hari, created_at FROM lokakarya WHERE id_pegawai = ?", *t.ID)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
-		lokakaryas := make([]Lokakarya, 0)
+		lokakaryas := make([]domain.Lokakarya, 0)
 		for rowsLokakarya.Next() {
-			lk := Lokakarya{}
+			lk := domain.Lokakarya{}
 			err := rowsLokakarya.Scan(
 				&lk.ID,
 				&lk.IDPegawai,
@@ -199,7 +200,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			}
 			lokakaryas = append(lokakaryas, lk)
 		}
-		res.Lokakarya = &lokakaryas
+		t.Lokakarya = lokakaryas
 		rowsLokakarya.Close()
 
 		// row Pengalaman Kerja
@@ -208,9 +209,9 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			logrus.Error(err)
 			return nil, err
 		}
-		pengalamankerjas := make([]PengalamanKerja, 0)
+		pengalamankerjas := make([]domain.PengalamanKerja, 0)
 		for rowsPengalamanKerja.Next() {
-			pk := PengalamanKerja{}
+			pk := domain.PengalamanKerja{}
 			err := rowsPengalamanKerja.Scan(
 				&pk.ID,
 				&pk.IDPegawai,
@@ -227,29 +228,26 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			}
 			pengalamankerjas = append(pengalamankerjas, pk)
 		}
-		res.PengalamanKerja = &pengalamankerjas
+		t.PengalamanKerja = pengalamankerjas
 		rowsPengalamanKerja.Close()
 
 		// row Riwayat Jabatan
-		rowsRiwayatJabatan, err := m.Conn.QueryContext(ctx, "SELECT * FROM riwayat_jabatan WHERE id_pegawai = ?", *t.ID)
+		rowsJabatan, err := m.Conn.QueryContext(ctx, "SELECT * FROM jabatan WHERE id_pegawai = ?", *t.ID)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
-		riwayatjabatans := make([]RiwayatJabatan, 0)
-		for rowsRiwayatJabatan.Next() {
-			rj := RiwayatJabatan{}
-			err := rowsRiwayatJabatan.Scan(
+		jabatans := make([]domain.Jabatan, 0)
+		for rowsJabatan.Next() {
+			rj := domain.Jabatan{}
+			err := rowsJabatan.Scan(
 				&rj.ID,
 				&rj.IDPegawai,
 				&rj.Tipe,
 				&rj.TerhitungMulai,
 				&rj.NomorSK,
-				&rj.JabatanLama,
-				&rj.JabatanBaru,
-				&rj.DepartemenLama,
-				&rj.DepartemenBaru,
-				&rj.MasaKerja,
+				&rj.NamaJabatan,
+				&rj.Departemen,
 				&rj.Keterangan,
 				&rj.CreatedAt,
 			)
@@ -257,31 +255,25 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 				logrus.Error(err)
 				return nil, err
 			}
-			riwayatjabatans = append(riwayatjabatans, rj)
+			jabatans = append(jabatans, rj)
 		}
-		res.RiwayatJabatan = &riwayatjabatans
-		rowsRiwayatJabatan.Close()
+		t.RiwayatJabatan = jabatans
+		rowsJabatan.Close()
 
-		// row Riwayat Penghargaan
-		rowsRiwayatPenghargaan, err := m.Conn.QueryContext(ctx, "SELECT * FROM riwayat_penghargaan WHERE id_pegawai = ?", *t.ID)
+		// row Penghargaan
+		rowsPenghargaan, err := m.Conn.QueryContext(ctx, "SELECT * FROM penghargaan WHERE id_pegawai = ?", *t.ID)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
-		riwayatpenghargaaans := make([]RiwayatJabatan, 0)
-		for rowsRiwayatJabatan.Next() {
-			rj := RiwayatJabatan{}
-			err := rowsRiwayatJabatan.Scan(
+		penghargaaans := make([]domain.Penghargaan, 0)
+		for rowsPenghargaan.Next() {
+			rj := domain.Penghargaan{}
+			err := rowsPenghargaan.Scan(
 				&rj.ID,
 				&rj.IDPegawai,
-				&rj.Tipe,
-				&rj.TerhitungMulai,
-				&rj.NomorSK,
-				&rj.JabatanLama,
-				&rj.JabatanBaru,
-				&rj.DepartemenLama,
-				&rj.DepartemenBaru,
-				&rj.MasaKerja,
+				&rj.JenisPenghargaan,
+				&rj.TanggalDiterima,
 				&rj.Keterangan,
 				&rj.CreatedAt,
 			)
@@ -289,15 +281,156 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 				logrus.Error(err)
 				return nil, err
 			}
-			riwayatjabatans = append(riwayatjabatans, rj)
+			penghargaaans = append(penghargaaans, rj)
 		}
-		res.RiwayatJabatan = &riwayatjabatans
-		rowsRiwayatJabatan.Close()
+		t.RiwayatPenghargaan = penghargaaans
+		rowsPenghargaan.Close()
+
+		// row Teguran
+		rowsTeguran, err := m.Conn.QueryContext(ctx, "SELECT * FROM teguran WHERE id_pegawai = ?", *t.ID)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+		tegurans := make([]domain.Teguran, 0)
+		for rowsTeguran.Next() {
+			rj := domain.Teguran{}
+			err := rowsTeguran.Scan(
+				&rj.ID,
+				&rj.IDPegawai,
+				&rj.JenisPelanggaran,
+				&rj.TanggalDikeluarkan,
+				&rj.Kesalahan,
+				&rj.Keterangan,
+				&rj.CreatedAt,
+			)
+			if err != nil {
+				logrus.Error(err)
+				return nil, err
+			}
+			tegurans = append(tegurans, rj)
+		}
+		t.RiwayatPenghargaan = penghargaaans
+		rowsTeguran.Close()
+
+		// row Surat Peringatan
+		rowsSperingatan, err := m.Conn.QueryContext(ctx, "SELECT * FROM speringatan WHERE id_pegawai = ?", *t.ID)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+		speringatans := make([]domain.SPeringatan, 0)
+		for rowsSperingatan.Next() {
+			rj := domain.SPeringatan{}
+			err := rowsSperingatan.Scan(
+				&rj.ID,
+				&rj.IDPegawai,
+				&rj.JenisSP,
+				&rj.TanggalDikeluarkan,
+				&rj.MasaBerlaku,
+				&rj.Kesalahan,
+				&rj.Keterangan,
+				&rj.CreatedAt,
+			)
+			if err != nil {
+				logrus.Error(err)
+				return nil, err
+			}
+			speringatans = append(speringatans, rj)
+		}
+		t.RiwayatPenghargaan = penghargaaans
+		rowsSperingatan.Close()
+
+				// row cuti
+				// rowsSperingatan, err := m.Conn.QueryContext(ctx, "SELECT * FROM absen WHERE id_pegawai = ?", *t.ID)
+				// if err != nil {
+				// 	logrus.Error(err)
+				// 	return nil, err
+				// }
+				// speringatans := make([]domain.SPeringatan, 0)
+				// for rowsSperingatan.Next() {
+				// 	rj := domain.SPeringatan{}
+				// 	err := rowsSperingatan.Scan(
+				// 		&rj.ID,
+				// 		&rj.IDPegawai,
+				// 		&rj.JenisSP,
+				// 		&rj.TanggalDikeluarkan,
+				// 		&rj.MasaBerlaku,
+				// 		&rj.Kesalahan,
+				// 		&rj.Keterangan,
+				// 		&rj.CreatedAt,
+				// 	)
+				// 	if err != nil {
+				// 		logrus.Error(err)
+				// 		return nil, err
+				// 	}
+				// 	speringatans = append(speringatans, rj)
+				// }
+				// t.RiwayatPenghargaan = penghargaaans
+				// rowsSperingatan.Close()
 
 	}
 
+	return
+
 }
 
+// Search(ctx context.Context, pegawai Pegawai) (res []Pegawai, err error)
 func (m *mysqlRepository) Search(ctx context.Context, pegawai domain.Pegawai) (res []domain.Pegawai, err error) {
+	query := `SELECT * FROM pegawai `
+	args := make([]interface{}, 0)
 
+	addWhere := false
+
+	if pegawai.ID != nil {
+		if addWhere == false {
+			query += " WHERE id LIKE '%?%' "
+			addWhere = true
+		} else {
+			query += " OR id LIKE '%?%' "
+		}
+		args = append(args, *pegawai.ID)
+	}
+
+	if pegawai.NIK != nil {
+		if addWhere == false {
+			query += " WHERE nik LIKE '%?%'"
+			addWhere = true
+		} else {
+			query += " OR nik LIKE '%?%' "
+		}
+		args = append(args, *pegawai.NIK)
+	}
+
+	if pegawai.NamaLengkap != nil {
+		if addWhere == false {
+			query += " WHERE nama_lengkap LIKE '%?%'"
+			addWhere = true
+		} else {
+			query += " OR nama_lengkap LIKE '%?%' "
+		}
+		args = append(args, *pegawai.NamaLengkap)
+	}
+
+	if pegawai.NamaPanggilan != nil {
+		if addWhere == false {
+			query += " WHERE nama_panggilan LIKE '%?%'"
+			addWhere = true
+		} else {
+			query += " OR nama_panggilan LIKE '%?%' "
+		}
+		args = append(args, *&pegawai.NamaPanggilan)
+	}
+
+	res, err = m.fetch(ctx, query, args)
+	if err != nil {
+		return nil, err
+	}
+
+	return
 }
+
+// Find(ctx context.Context, pegawai Pegawai) (res Pegawai, err error)
+// Insert(ctx context.Context, pegawai *Pegawai) (err error)
+// Update(ctx context.Context, pegawai Pegawai) (err error)
+// Delete(ctx context.Context, id int64) (err error)
