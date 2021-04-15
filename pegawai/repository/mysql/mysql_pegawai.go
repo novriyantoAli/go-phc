@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/novriyantoAli/go-phc/domain"
 	"github.com/sirupsen/logrus"
@@ -13,7 +14,7 @@ type mysqlRepository struct {
 }
 
 func NewMysqlRepository(conn *sql.DB) domain.PegawaiRepository {
-	return mysqlRepository{Conn: conn}
+	return &mysqlRepository{Conn: conn}
 }
 
 func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...interface{}) (res []domain.Pegawai, err error) {
@@ -341,33 +342,33 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		t.RiwayatPenghargaan = penghargaaans
 		rowsSperingatan.Close()
 
-				// row cuti
-				// rowsSperingatan, err := m.Conn.QueryContext(ctx, "SELECT * FROM absen WHERE id_pegawai = ?", *t.ID)
-				// if err != nil {
-				// 	logrus.Error(err)
-				// 	return nil, err
-				// }
-				// speringatans := make([]domain.SPeringatan, 0)
-				// for rowsSperingatan.Next() {
-				// 	rj := domain.SPeringatan{}
-				// 	err := rowsSperingatan.Scan(
-				// 		&rj.ID,
-				// 		&rj.IDPegawai,
-				// 		&rj.JenisSP,
-				// 		&rj.TanggalDikeluarkan,
-				// 		&rj.MasaBerlaku,
-				// 		&rj.Kesalahan,
-				// 		&rj.Keterangan,
-				// 		&rj.CreatedAt,
-				// 	)
-				// 	if err != nil {
-				// 		logrus.Error(err)
-				// 		return nil, err
-				// 	}
-				// 	speringatans = append(speringatans, rj)
-				// }
-				// t.RiwayatPenghargaan = penghargaaans
-				// rowsSperingatan.Close()
+		// row cuti
+		// rowsSperingatan, err := m.Conn.QueryContext(ctx, "SELECT * FROM absen WHERE id_pegawai = ?", *t.ID)
+		// if err != nil {
+		// 	logrus.Error(err)
+		// 	return nil, err
+		// }
+		// speringatans := make([]domain.SPeringatan, 0)
+		// for rowsSperingatan.Next() {
+		// 	rj := domain.SPeringatan{}
+		// 	err := rowsSperingatan.Scan(
+		// 		&rj.ID,
+		// 		&rj.IDPegawai,
+		// 		&rj.JenisSP,
+		// 		&rj.TanggalDikeluarkan,
+		// 		&rj.MasaBerlaku,
+		// 		&rj.Kesalahan,
+		// 		&rj.Keterangan,
+		// 		&rj.CreatedAt,
+		// 	)
+		// 	if err != nil {
+		// 		logrus.Error(err)
+		// 		return nil, err
+		// 	}
+		// 	speringatans = append(speringatans, rj)
+		// }
+		// t.RiwayatPenghargaan = penghargaaans
+		// rowsSperingatan.Close()
 
 	}
 
@@ -431,6 +432,203 @@ func (m *mysqlRepository) Search(ctx context.Context, pegawai domain.Pegawai) (r
 }
 
 // Find(ctx context.Context, pegawai Pegawai) (res Pegawai, err error)
+func (m *mysqlRepository) Find(ctx context.Context, pegawai domain.Pegawai) (res domain.Pegawai, err error) {
+	query := `SELECT * FROM pegawai `
+	args := make([]interface{}, 0)
+
+	addWhere := false
+
+	if pegawai.ID != nil {
+		if addWhere == false {
+			query += "WHERE id = ?"
+			addWhere = true
+		} else {
+			query += ` AND id = ?`
+		}
+		args = append(args, *&pegawai.ID)
+	}
+
+	if pegawai.NIK != nil {
+		if addWhere == false {
+			query += "WHERE nik = ?"
+			addWhere = true
+		} else {
+			query += ` AND nik = ?`
+		}
+		args = append(args, *pegawai.NIK)
+	}
+
+	if pegawai.NamaLengkap != nil {
+		if addWhere == false {
+			query += "WHERE nama_lengkap = ?"
+			addWhere = true
+		} else {
+			query += ` AND nama_lengkap = ?`
+		}
+		args = append(args, *pegawai.NamaLengkap)
+	}
+
+	if pegawai.NamaPanggilan != nil {
+		if addWhere == false {
+			query += "WHERE nama_panggilan = ?"
+			addWhere = true
+		} else {
+			query += ` AND nama_panggilan = ?`
+		}
+		args = append(args, *pegawai.NamaPanggilan)
+	}
+
+	resArr, err := m.fetch(ctx, query, args...)
+	if err != nil {
+		return domain.Pegawai{}, err
+	}
+
+	if len(resArr) > 0 {
+		return resArr[0], nil
+	}
+
+	return domain.Pegawai{}, domain.ErrBadParamInput
+}
+
 // Insert(ctx context.Context, pegawai *Pegawai) (err error)
+func (m *mysqlRepository) Insert(ctx context.Context, pegawai *domain.Pegawai) (err error) {
+	tx, err := m.Conn.BeginTx(ctx, nil)
+
+	query := "INSERT INTO pegawai(id_kabupaten, nik, nama_lengkap, nama_panggilan, nktp, nohp, jenis_kelamin, tempat_lahir, tanggal_lahir, agama, status_perkawinan, kewarganegaraan, golongan_darah, bahasa, suku, daerah_asal, tanggal_mulai_bekerja, level, divisi, seksi, bagian, status_karyawan, no_rekening, no_bpjs_kesehatan, no_bpjs_ketenagakerjaan) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+	res, err := tx.ExecContext(
+		ctx, query,
+		*pegawai.IDKabupaten,
+		*pegawai.NIK,
+		*pegawai.NamaLengkap,
+		*pegawai.NamaPanggilan,
+		*pegawai.NKTP,
+		*pegawai.NOHP,
+		*pegawai.JenisKelamin,
+		*pegawai.TempatLahir,
+		*pegawai.TanggalLahir,
+		*pegawai.Agama,
+		*pegawai.StatusPerkawinan,
+		*pegawai.Kewarganegaraan,
+		*pegawai.GolonganDarah,
+		*pegawai.Bahasa,
+		*pegawai.Suku,
+		*pegawai.DaerahAsal,
+		*pegawai.TanggalMulaiBekerja,
+		*pegawai.Level,
+		*pegawai.Divisi,
+		*pegawai.Seksi,
+		*pegawai.Bagian,
+		*pegawai.StatusKaryawan,
+		*pegawai.NoRekening,
+		*pegawai.NoBPJSKesehatan,
+		*pegawai.NoBPJSKetenagakerjaan,
+	)
+
+	if err != nil {
+		logrus.Error(err)
+
+		tx.Rollback()
+		return err
+	}
+
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		logrus.Error(err)
+
+		tx.Rollback()
+		return
+	}
+
+	pegawai.ID = &lastID
+
+	err = tx.Commit()
+	if err != nil {
+		logrus.Error(err)
+
+		return err
+	}
+
+	return nil
+}
+
 // Update(ctx context.Context, pegawai Pegawai) (err error)
+func (m *mysqlRepository) Update(ctx context.Context, pegawai domain.Pegawai) (err error) {
+	tx, err := m.Conn.BeginTx(ctx, nil)
+
+	query := "UPDATE pegawai SET id_kabupaten = ?, nik = ?, nama_lengkap = ?, nama_panggilan = ?, nktp = ?, nohp = ?, jenis_kelamin = ?, tempat_lahir = ?, tanggal_lahir = ?, agama = ?, status_perkawinan = ?, kewarganegaraan = ?, golongan_darah = ?, bahasa = ?, suku = ?, daerah_asal = ?, tanggal_mulai_bekerja = ?, level = ?, divisi = ?, seksi = ?, bagian = ?, status_karyawan = ?, no_rekening = ?, no_bpjs_kesehatan = ?, no_bpjs_ketenagakerjaan = ? WHERE id = ?"
+	_, err = tx.ExecContext(
+		ctx, query,
+		*pegawai.IDKabupaten,
+		*pegawai.NIK,
+		*pegawai.NamaLengkap,
+		*pegawai.NamaPanggilan,
+		*pegawai.NKTP,
+		*pegawai.NOHP,
+		*pegawai.JenisKelamin,
+		*pegawai.TempatLahir,
+		*pegawai.TanggalLahir,
+		*pegawai.Agama,
+		*pegawai.StatusPerkawinan,
+		*pegawai.Kewarganegaraan,
+		*pegawai.GolonganDarah,
+		*pegawai.Bahasa,
+		*pegawai.Suku,
+		*pegawai.DaerahAsal,
+		*pegawai.TanggalMulaiBekerja,
+		*pegawai.Level,
+		*pegawai.Divisi,
+		*pegawai.Seksi,
+		*pegawai.Bagian,
+		*pegawai.StatusKaryawan,
+		*pegawai.NoRekening,
+		*pegawai.NoBPJSKesehatan,
+		*pegawai.NoBPJSKetenagakerjaan,
+		*pegawai.ID,
+	)
+
+	if err != nil {
+		logrus.Error(err)
+
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+
+	return
+}
+
 // Delete(ctx context.Context, id int64) (err error)
+func (m *mysqlRepository) Delete(ctx context.Context, id int64) (err error) {
+	query := "DELETE FROM pegawai WHERE id = ?"
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+
+	res, err := stmt.ExecContext(ctx, id)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+
+	if rowsAffected != 1 {
+		err = fmt.Errorf("Weird  Behavior. Total Affected: %d", rowsAffected)
+		logrus.Error(err)
+		return
+	}
+
+	return
+}

@@ -58,3 +58,7 @@ type PegawaiRepository interface {
 	Update(ctx context.Context, pegawai Pegawai) (err error)
 	Delete(ctx context.Context, id int64) (err error)
 }
+
+type PegawaiUsecase interface {
+	Get(c context.Context, nik string) (res Pegawai, err error)
+}
