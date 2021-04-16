@@ -497,7 +497,34 @@ func (m *mysqlRepository) Insert(ctx context.Context, pegawai *domain.Pegawai) (
 		return
 	}
 
-	query := "INSERT INTO pegawai(id_kabupaten, nik, nama_lengkap, nama_panggilan, nktp, nohp, jenis_kelamin, tempat_lahir, tanggal_lahir, agama, status_perkawinan, kewarganegaraan, golongan_darah, bahasa, suku, daerah_asal, tanggal_mulai_bekerja, level, divisi, seksi, bagian, status_karyawan, no_rekening, no_bpjs_kesehatan, no_bpjs_ketenagakerjaan) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+	query := `
+	INSERT INTO pegawai(
+		id_kabupaten, 
+		nik, 
+		nama_lengkap, 
+		nama_panggilan, 
+		nktp, 
+		nohp, 
+		jenis_kelamin, 
+		tempat_lahir, 
+		tanggal_lahir, 
+		agama, 
+		status_perkawinan, 
+		kewarganegaraan, 
+		golongan_darah, 
+		bahasa, 
+		suku, 
+		daerah_asal, 
+		tanggal_mulai_bekerja, 
+		level, 
+		divisi, 
+		seksi, 
+		bagian, 
+		status_karyawan,
+		tanggal_pengangkatan, 
+		no_rekening, 
+		no_bpjs_kesehatan, 
+		no_bpjs_ketenagakerjaan) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 	res, err := tx.ExecContext(
 		ctx, query,
 		*pegawai.IDKabupaten,
@@ -522,6 +549,7 @@ func (m *mysqlRepository) Insert(ctx context.Context, pegawai *domain.Pegawai) (
 		*pegawai.Seksi,
 		*pegawai.Bagian,
 		*pegawai.StatusKaryawan,
+		*pegawai.TanggalPengangkatan,
 		*pegawai.NoRekening,
 		*pegawai.NoBPJSKesehatan,
 		*pegawai.NoBPJSKetenagakerjaan,

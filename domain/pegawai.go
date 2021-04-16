@@ -11,8 +11,8 @@ type Pegawai struct {
 	NIK                    *string            `json:"nik"`
 	NamaLengkap            *string            `json:"nama_lengkap"`
 	NamaPanggilan          *string            `json:"nama_panggilan"`
-	NKTP                   *int64             `json:"nktp"`
-	NOHP                   *string            `json:"no_hp"`
+	NKTP                   *string            `json:"nktp"`
+	NOHP                   *string            `json:"nohp"`
 	JenisKelamin           *string            `json:"jenis_kelamin"`
 	TempatLahir            *string            `json:"tempat_lahir"`
 	TanggalLahir           *time.Time         `json:"tanggal_lahir"`
@@ -61,4 +61,5 @@ type PegawaiRepository interface {
 
 type PegawaiUsecase interface {
 	Get(c context.Context, nik string) (res Pegawai, err error)
+	Store(c context.Context, pegawai *Pegawai) (err error)
 }

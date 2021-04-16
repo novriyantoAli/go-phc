@@ -31,3 +31,15 @@ func (u *pegawaiUsecase) Get(c context.Context, nik string) (res domain.Pegawai,
 
 	return
 }
+
+func (u *pegawaiUsecase) Store(c context.Context, pegawai *domain.Pegawai) (err error) {
+	ctx, cancel := context.WithTimeout(c, u.Timeout)
+	defer cancel()
+
+	err = u.Repository.Insert(ctx, pegawai)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	return
+}

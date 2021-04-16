@@ -29,6 +29,7 @@ func NewHandler(e *echo.Echo, usecase domain.PegawaiUsecase) {
 
 	g := e.Group("/api/pegawai", isLoggedIn)
 	g.GET("", handler.GetPegawai)
+	g.POST("", handler.PostPegawai)
 }
 
 func (h *pegawaiHandler) GetPegawai(e echo.Context) error {
@@ -42,4 +43,19 @@ func (h *pegawaiHandler) GetPegawai(e echo.Context) error {
 	}
 
 	return e.JSON(http.StatusOK, res)
+}
+
+func (h *pegawaiHandler) PostPegawai(e echo.Context) error {
+	u := new(domain.Pegawai)
+	if err := e.Bind(u); err != nil {
+		logrus.Error(err)
+		return e.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
+	}
+
+	if err := h.ucase.Store(e.Request().Context(), u); err != nil {
+		logrus.Error(err)
+		return e.JSON(helper.TranslateError(err), ResponseError{Message: err.Error()})
+	}
+
+	return e.JSON(http.StatusOK, u)
 }
