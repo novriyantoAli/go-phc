@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/xml"
 	"net"
+	"strconv"
 
 	"github.com/novriyantoAli/go-phc/helper"
 	"github.com/sirupsen/logrus"
@@ -35,7 +36,7 @@ func getData(IPAddress string, key string, ch chan Response) {
 
 	fmt.Fprintf(conn, "POST /iWsService HTTP/1.0" + newLine)
 	fmt.Fprintf(conn, "Content-Type: text/xml" + newLine)
-	fmt.Fprintf(conn, "Content-Length: " + len(soapRequest)+newLine+newLine)
+	fmt.Fprintf(conn, "Content-Length: " + strconv.Itoa(len(soapRequest)) +newLine+newLine)
 	fmt.Fprintf(conn, soapRequest + newLine)
 
     var buf bytes.Buffer
