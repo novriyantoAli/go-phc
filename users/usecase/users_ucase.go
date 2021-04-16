@@ -80,7 +80,7 @@ func (uc *usersUsecase) Login(c context.Context, nik string, password string) (r
 		return domain.JWTCustomClaims{}, domain.ErrBadParamInput
 	}
 
-	if comparePasswords(*resUser.Password, []byte(password)) == false {
+	if !comparePasswords(*resUser.Password, []byte(password)) {
 		return domain.JWTCustomClaims{}, domain.ErrBadParamInput
 	}
 

@@ -18,7 +18,7 @@ func NewMysqlRepository(conn *sql.DB) domain.PegawaiRepository {
 }
 
 func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...interface{}) (res []domain.Pegawai, err error) {
-	rows, err := m.Conn.QueryContext(ctx, query, args)
+	rows, err := m.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -53,18 +53,16 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			&t.Suku,
 			&t.DaerahAsal,
 			&t.TanggalMulaiBekerja,
-			&t.JabatanSekarang,
 			&t.Level,
 			&t.Divisi,
-			&t.Departemen,
 			&t.Seksi,
 			&t.Bagian,
 			&t.StatusKaryawan,
 			&t.TanggalPengangkatan,
-			&t.MasaKerja,
 			&t.NoRekening,
 			&t.NoBPJSKesehatan,
 			&t.NoBPJSKetenagakerjaan,
+			&t.CreatedAt,
 		)
 
 		if err != nil {
@@ -75,7 +73,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		// row location
 		kabupaten := domain.Kabupaten{}
 		provinsi := domain.Provinsi{}
-		err := m.Conn.QueryRowContext(ctx, "SELECT kabupaten.*, provinsi.* FROM kabupaten INNER JOIN provinsi WHERE kabupaten.id_provinsi = provinsi.id WHERE kabupaten.id = ?", *t.IDKabupaten).Scan(
+		err = m.Conn.QueryRowContext(ctx, "SELECT kabupaten.*, provinsi.* FROM kabupaten INNER JOIN provinsi ON provinsi.id = kabupaten.id_provinsi WHERE kabupaten.id = ?", *t.IDKabupaten).Scan(
 			&kabupaten.ID,
 			&kabupaten.IDProvinsi,
 			&kabupaten.NamaKabupaten,
@@ -100,7 +98,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		keluargas := make([]domain.Keluarga, 0)
 		for rowsKeluarga.Next() {
 			kg := domain.Keluarga{}
-			err := rowsKeluarga.Scan(
+			err = rowsKeluarga.Scan(
 				&kg.ID,
 				&kg.IDPegawai,
 				&kg.TipeHubungan,
@@ -128,7 +126,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		kontakdarurats := make([]domain.KontakDarurat, 0)
 		for rowsKontakDarurat.Next() {
 			kd := domain.KontakDarurat{}
-			err := rowsKontakDarurat.Scan(
+			err = rowsKontakDarurat.Scan(
 				&kd.ID,
 				&kd.IDPegawai,
 				&kd.NamaLengkap,
@@ -157,7 +155,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		riwayatpendidikans := make([]domain.Pendidikan, 0)
 		for rowsPendidikan.Next() {
 			rp := domain.Pendidikan{}
-			err := rowsPendidikan.Scan(
+			err = rowsPendidikan.Scan(
 				&rp.ID,
 				&rp.IDPegawai,
 				&rp.TingkatPendidikan,
@@ -185,7 +183,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		lokakaryas := make([]domain.Lokakarya, 0)
 		for rowsLokakarya.Next() {
 			lk := domain.Lokakarya{}
-			err := rowsLokakarya.Scan(
+			err = rowsLokakarya.Scan(
 				&lk.ID,
 				&lk.IDPegawai,
 				&lk.NamaSeminar,
@@ -213,7 +211,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		pengalamankerjas := make([]domain.PengalamanKerja, 0)
 		for rowsPengalamanKerja.Next() {
 			pk := domain.PengalamanKerja{}
-			err := rowsPengalamanKerja.Scan(
+			err = rowsPengalamanKerja.Scan(
 				&pk.ID,
 				&pk.IDPegawai,
 				&pk.DariTahun,
@@ -241,7 +239,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		jabatans := make([]domain.Jabatan, 0)
 		for rowsJabatan.Next() {
 			rj := domain.Jabatan{}
-			err := rowsJabatan.Scan(
+			err = rowsJabatan.Scan(
 				&rj.ID,
 				&rj.IDPegawai,
 				&rj.Tipe,
@@ -270,7 +268,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		penghargaaans := make([]domain.Penghargaan, 0)
 		for rowsPenghargaan.Next() {
 			rj := domain.Penghargaan{}
-			err := rowsPenghargaan.Scan(
+			err = rowsPenghargaan.Scan(
 				&rj.ID,
 				&rj.IDPegawai,
 				&rj.JenisPenghargaan,
@@ -296,7 +294,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		tegurans := make([]domain.Teguran, 0)
 		for rowsTeguran.Next() {
 			rj := domain.Teguran{}
-			err := rowsTeguran.Scan(
+			err = rowsTeguran.Scan(
 				&rj.ID,
 				&rj.IDPegawai,
 				&rj.JenisPelanggaran,
@@ -311,7 +309,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			}
 			tegurans = append(tegurans, rj)
 		}
-		t.RiwayatPenghargaan = penghargaaans
+		t.RiwayatTeguran = tegurans
 		rowsTeguran.Close()
 
 		// row Surat Peringatan
@@ -323,7 +321,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		speringatans := make([]domain.SPeringatan, 0)
 		for rowsSperingatan.Next() {
 			rj := domain.SPeringatan{}
-			err := rowsSperingatan.Scan(
+			err = rowsSperingatan.Scan(
 				&rj.ID,
 				&rj.IDPegawai,
 				&rj.JenisSP,
@@ -339,7 +337,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			}
 			speringatans = append(speringatans, rj)
 		}
-		t.RiwayatPenghargaan = penghargaaans
+		t.RiwayatSuratPeringatan = speringatans
 		rowsSperingatan.Close()
 
 		// row cuti
@@ -369,7 +367,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 		// }
 		// t.RiwayatPenghargaan = penghargaaans
 		// rowsSperingatan.Close()
-
+		res = append(res, t)
 	}
 
 	return
@@ -384,7 +382,7 @@ func (m *mysqlRepository) Search(ctx context.Context, pegawai domain.Pegawai) (r
 	addWhere := false
 
 	if pegawai.ID != nil {
-		if addWhere == false {
+		if addWhere {
 			query += " WHERE id LIKE '%?%' "
 			addWhere = true
 		} else {
@@ -394,7 +392,7 @@ func (m *mysqlRepository) Search(ctx context.Context, pegawai domain.Pegawai) (r
 	}
 
 	if pegawai.NIK != nil {
-		if addWhere == false {
+		if !addWhere {
 			query += " WHERE nik LIKE '%?%'"
 			addWhere = true
 		} else {
@@ -404,7 +402,7 @@ func (m *mysqlRepository) Search(ctx context.Context, pegawai domain.Pegawai) (r
 	}
 
 	if pegawai.NamaLengkap != nil {
-		if addWhere == false {
+		if !addWhere {
 			query += " WHERE nama_lengkap LIKE '%?%'"
 			addWhere = true
 		} else {
@@ -414,13 +412,13 @@ func (m *mysqlRepository) Search(ctx context.Context, pegawai domain.Pegawai) (r
 	}
 
 	if pegawai.NamaPanggilan != nil {
-		if addWhere == false {
+		if !addWhere {
 			query += " WHERE nama_panggilan LIKE '%?%'"
 			addWhere = true
 		} else {
 			query += " OR nama_panggilan LIKE '%?%' "
 		}
-		args = append(args, *&pegawai.NamaPanggilan)
+		args = append(args, *pegawai.NamaPanggilan)
 	}
 
 	res, err = m.fetch(ctx, query, args)
@@ -439,17 +437,17 @@ func (m *mysqlRepository) Find(ctx context.Context, pegawai domain.Pegawai) (res
 	addWhere := false
 
 	if pegawai.ID != nil {
-		if addWhere == false {
+		if !addWhere {
 			query += "WHERE id = ?"
 			addWhere = true
 		} else {
 			query += ` AND id = ?`
 		}
-		args = append(args, *&pegawai.ID)
+		args = append(args, *pegawai.ID)
 	}
 
 	if pegawai.NIK != nil {
-		if addWhere == false {
+		if !addWhere {
 			query += "WHERE nik = ?"
 			addWhere = true
 		} else {
@@ -459,7 +457,7 @@ func (m *mysqlRepository) Find(ctx context.Context, pegawai domain.Pegawai) (res
 	}
 
 	if pegawai.NamaLengkap != nil {
-		if addWhere == false {
+		if !addWhere {
 			query += "WHERE nama_lengkap = ?"
 			addWhere = true
 		} else {
@@ -469,7 +467,7 @@ func (m *mysqlRepository) Find(ctx context.Context, pegawai domain.Pegawai) (res
 	}
 
 	if pegawai.NamaPanggilan != nil {
-		if addWhere == false {
+		if !addWhere {
 			query += "WHERE nama_panggilan = ?"
 			addWhere = true
 		} else {
@@ -480,6 +478,7 @@ func (m *mysqlRepository) Find(ctx context.Context, pegawai domain.Pegawai) (res
 
 	resArr, err := m.fetch(ctx, query, args...)
 	if err != nil {
+		logrus.Error(err)
 		return domain.Pegawai{}, err
 	}
 
@@ -493,6 +492,10 @@ func (m *mysqlRepository) Find(ctx context.Context, pegawai domain.Pegawai) (res
 // Insert(ctx context.Context, pegawai *Pegawai) (err error)
 func (m *mysqlRepository) Insert(ctx context.Context, pegawai *domain.Pegawai) (err error) {
 	tx, err := m.Conn.BeginTx(ctx, nil)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
 
 	query := "INSERT INTO pegawai(id_kabupaten, nik, nama_lengkap, nama_panggilan, nktp, nohp, jenis_kelamin, tempat_lahir, tanggal_lahir, agama, status_perkawinan, kewarganegaraan, golongan_darah, bahasa, suku, daerah_asal, tanggal_mulai_bekerja, level, divisi, seksi, bagian, status_karyawan, no_rekening, no_bpjs_kesehatan, no_bpjs_ketenagakerjaan) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 	res, err := tx.ExecContext(
@@ -554,6 +557,10 @@ func (m *mysqlRepository) Insert(ctx context.Context, pegawai *domain.Pegawai) (
 // Update(ctx context.Context, pegawai Pegawai) (err error)
 func (m *mysqlRepository) Update(ctx context.Context, pegawai domain.Pegawai) (err error) {
 	tx, err := m.Conn.BeginTx(ctx, nil)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
 
 	query := "UPDATE pegawai SET id_kabupaten = ?, nik = ?, nama_lengkap = ?, nama_panggilan = ?, nktp = ?, nohp = ?, jenis_kelamin = ?, tempat_lahir = ?, tanggal_lahir = ?, agama = ?, status_perkawinan = ?, kewarganegaraan = ?, golongan_darah = ?, bahasa = ?, suku = ?, daerah_asal = ?, tanggal_mulai_bekerja = ?, level = ?, divisi = ?, seksi = ?, bagian = ?, status_karyawan = ?, no_rekening = ?, no_bpjs_kesehatan = ?, no_bpjs_ketenagakerjaan = ? WHERE id = ?"
 	_, err = tx.ExecContext(
@@ -625,7 +632,7 @@ func (m *mysqlRepository) Delete(ctx context.Context, id int64) (err error) {
 	}
 
 	if rowsAffected != 1 {
-		err = fmt.Errorf("Weird  Behavior. Total Affected: %d", rowsAffected)
+		err = fmt.Errorf("weird  behavior. total affected: %d", rowsAffected)
 		logrus.Error(err)
 		return
 	}

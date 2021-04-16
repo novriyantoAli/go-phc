@@ -1,4 +1,5 @@
 package main
+
 import (
 	"database/sql"
 	"fmt"
@@ -18,6 +19,10 @@ import (
 	_usersHandler "github.com/novriyantoAli/go-phc/users/delivery/http"
 	_usersRepository "github.com/novriyantoAli/go-phc/users/repository/mysql"
 	_usersUsecase "github.com/novriyantoAli/go-phc/users/usecase"
+
+	_pegawaiHandler "github.com/novriyantoAli/go-phc/pegawai/delivery/http"
+	_pegawaiRepository "github.com/novriyantoAli/go-phc/pegawai/repository/mysql"
+	_pegawaiUsecase "github.com/novriyantoAli/go-phc/pegawai/usecase"
 )
 
 type responseError struct {
@@ -101,16 +106,19 @@ func main() {
 	 * Defined Application Repository
 	 */
 	usersRepository := _usersRepository.NewMysqlRepository(dbConn)
+	pegawaiRepository := _pegawaiRepository.NewMysqlRepository(dbConn)
 
 	/**
 	 * Defined Application Usecase
 	 */
 	usersUsecase := _usersUsecase.NewUsecase(timeout, usersRepository)
+	pegawaiUsecase := _pegawaiUsecase.NewUsecase(timeout, pegawaiRepository)
 
 	/**
 	 * Call all Handler here
 	 */
 	_usersHandler.NewHandler(e, usersUsecase)
+	_pegawaiHandler.NewHandler(e, pegawaiUsecase)
 
 	/**
 	 * Call Echo Framework function for run this app
