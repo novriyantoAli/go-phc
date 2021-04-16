@@ -11,6 +11,7 @@ type Pegawai struct {
 	NIK                    *string            `json:"nik"`
 	NamaLengkap            *string            `json:"nama_lengkap"`
 	NamaPanggilan          *string            `json:"nama_panggilan"`
+	Alamat                 *string            `json:"alamat"`
 	NKTP                   *string            `json:"nktp"`
 	NOHP                   *string            `json:"nohp"`
 	JenisKelamin           *string            `json:"jenis_kelamin"`

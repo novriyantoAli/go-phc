@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Absen struct {
 	ID            *int64     `json:"id"`
@@ -29,4 +32,12 @@ type RiwayatKehadiran struct {
 	Tahun      *string    `json:"tahun"`
 	Keterangan *string    `json:"keterangan"`
 	CreatedAt  *time.Time `json:"created_at"`
+}
+
+type AbsenRepository interface {
+	Find(ctx context.Context, absen Absen) (res Absen, err error)
+	Search(ctx context.Context, absen Absen) (res Absen, err error)
+	Insert(ctx context.Context, absen *Absen) (err error)
+	Update(ctx context.Context, absen *Absen) (err error)
+	Delete(ctx context.Context, id int64) (err error)
 }

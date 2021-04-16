@@ -40,6 +40,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			&t.NIK,
 			&t.NamaLengkap,
 			&t.NamaPanggilan,
+			&t.Alamat,
 			&t.NKTP,
 			&t.NOHP,
 			&t.JenisKelamin,
@@ -502,7 +503,8 @@ func (m *mysqlRepository) Insert(ctx context.Context, pegawai *domain.Pegawai) (
 		id_kabupaten, 
 		nik, 
 		nama_lengkap, 
-		nama_panggilan, 
+		nama_panggilan,
+		alamat, 
 		nktp, 
 		nohp, 
 		jenis_kelamin, 
@@ -524,13 +526,14 @@ func (m *mysqlRepository) Insert(ctx context.Context, pegawai *domain.Pegawai) (
 		tanggal_pengangkatan, 
 		no_rekening, 
 		no_bpjs_kesehatan, 
-		no_bpjs_ketenagakerjaan) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+		no_bpjs_ketenagakerjaan) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 	res, err := tx.ExecContext(
 		ctx, query,
 		*pegawai.IDKabupaten,
 		*pegawai.NIK,
 		*pegawai.NamaLengkap,
 		*pegawai.NamaPanggilan,
+		*pegawai.Alamat,
 		*pegawai.NKTP,
 		*pegawai.NOHP,
 		*pegawai.JenisKelamin,
@@ -590,13 +593,14 @@ func (m *mysqlRepository) Update(ctx context.Context, pegawai domain.Pegawai) (e
 		return
 	}
 
-	query := "UPDATE pegawai SET id_kabupaten = ?, nik = ?, nama_lengkap = ?, nama_panggilan = ?, nktp = ?, nohp = ?, jenis_kelamin = ?, tempat_lahir = ?, tanggal_lahir = ?, agama = ?, status_perkawinan = ?, kewarganegaraan = ?, golongan_darah = ?, bahasa = ?, suku = ?, daerah_asal = ?, tanggal_mulai_bekerja = ?, level = ?, divisi = ?, seksi = ?, bagian = ?, status_karyawan = ?, no_rekening = ?, no_bpjs_kesehatan = ?, no_bpjs_ketenagakerjaan = ? WHERE id = ?"
+	query := "UPDATE pegawai SET id_kabupaten = ?, nik = ?, nama_lengkap = ?, nama_panggilan = ?, alamat = ?, nktp = ?, nohp = ?, jenis_kelamin = ?, tempat_lahir = ?, tanggal_lahir = ?, agama = ?, status_perkawinan = ?, kewarganegaraan = ?, golongan_darah = ?, bahasa = ?, suku = ?, daerah_asal = ?, tanggal_mulai_bekerja = ?, level = ?, divisi = ?, seksi = ?, bagian = ?, status_karyawan = ?, no_rekening = ?, no_bpjs_kesehatan = ?, no_bpjs_ketenagakerjaan = ? WHERE id = ?"
 	_, err = tx.ExecContext(
 		ctx, query,
 		*pegawai.IDKabupaten,
 		*pegawai.NIK,
 		*pegawai.NamaLengkap,
 		*pegawai.NamaPanggilan,
+		*pegawai.Alamat,
 		*pegawai.NKTP,
 		*pegawai.NOHP,
 		*pegawai.JenisKelamin,

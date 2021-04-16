@@ -45,9 +45,9 @@ func getData(IPAddress string, key string, ch chan Response) {
 
 // RunScheduler is a function to schedule finger print machine
 func RunScheduler(){
-	channel := make(ch chan Response)
+	channel := make(chan Response)
 	for {
-		go getData(viper.GetString("finger.ip1"), viper.GetString("finger.key"), ch)
+		go getData(viper.GetString("finger.ip1"), viper.GetString("finger.key"), channel)
 		
 	}
 }
