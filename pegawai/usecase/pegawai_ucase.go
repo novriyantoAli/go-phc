@@ -52,3 +52,21 @@ func (u *pegawaiUsecase) Update(c context.Context, pegawai domain.Pegawai) (err 
 
 	return
 }
+
+func (u *pegawaiUsecase) Delete(c context.Context, id int64) (res domain.Pegawai, err error) {
+	ctx, cancel := context.WithTimeout(c, u.Timeout)
+	defer cancel()
+
+	tempPeg := domain.Pegawai{}
+	tempPeg.ID = &id
+
+	res, err = u.Repository.Find(ctx, tempPeg)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+
+	err = u.Repository.Delete(ctx, id)
+
+	return
+}

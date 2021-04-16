@@ -63,4 +63,5 @@ type PegawaiUsecase interface {
 	Get(c context.Context, nik string) (res Pegawai, err error)
 	Store(c context.Context, pegawai *Pegawai) (err error)
 	Update(c context.Context, pegawai Pegawai) (err error)
+	Delete(c context.Context, id int64) (res Pegawai, err error)
 }
