@@ -112,8 +112,8 @@ func (m *mysqlRepository) Search(ctx context.Context, absen domain.Absen) (res [
 	query := "SELECT * FROM absen "
 	args := make([]interface{}, 0)
 
-	contains := "%"
-
+	containsOpen := "'%"
+	containsClose := "%'"
 	addWhere := false
 
 	if absen.ID != nil {
@@ -123,7 +123,7 @@ func (m *mysqlRepository) Search(ctx context.Context, absen domain.Absen) (res [
 		} else {
 			query += " OR id LIKE ? "
 		}
-		args = append(args, contains+strconv.FormatInt(*absen.ID, 10)+contains)
+		args = append(args, containsOpen+strconv.FormatInt(*absen.ID, 10)+containsClose)
 	}
 
 	if absen.IDPegawai != nil {
@@ -133,7 +133,7 @@ func (m *mysqlRepository) Search(ctx context.Context, absen domain.Absen) (res [
 		} else {
 			query += " OR id_pegawai LIKE ? "
 		}
-		args = append(args, contains+strconv.FormatInt(*absen.ID, 10)+contains)
+		args = append(args, containsOpen+strconv.FormatInt(*absen.ID, 10)+containsClose)
 	}
 
 	if absen.Tipe != nil {
@@ -143,7 +143,7 @@ func (m *mysqlRepository) Search(ctx context.Context, absen domain.Absen) (res [
 		} else {
 			query += " OR tipe LIKE ? "
 		}
-		args = append(args, contains+*absen.Tipe+contains)
+		args = append(args, containsOpen+*absen.Tipe+containsClose)
 	}
 
 	if absen.Keterangan != nil {
@@ -153,7 +153,7 @@ func (m *mysqlRepository) Search(ctx context.Context, absen domain.Absen) (res [
 		} else {
 			query += " OR keterangan LIKE ? "
 		}
-		args = append(args, contains+*absen.Keterangan+contains)
+		args = append(args, containsOpen+*absen.Keterangan+containsClose)
 	}
 
 	res, err = m.fetch(ctx, query, args...)
@@ -172,7 +172,7 @@ func (m *mysqlRepository) Insert(ctx context.Context, absen *domain.Absen) (err 
 	}
 
 	query := `
-	INSERT INTO absen(id_pegawai, tipe, dari_tanggal, sampai_tanggal, keterangan) VALUES(?,?,?,?)`
+	INSERT INTO absen(id_pegawai, tipe, dari_tanggal, sampai_tanggal, keterangan) VALUES(?,?,?,?,?)`
 	res, err := tx.ExecContext(
 		ctx, query,
 		*absen.IDPegawai,
