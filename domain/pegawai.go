@@ -62,4 +62,5 @@ type PegawaiRepository interface {
 type PegawaiUsecase interface {
 	Get(c context.Context, nik string) (res Pegawai, err error)
 	Store(c context.Context, pegawai *Pegawai) (err error)
+	Update(c context.Context, pegawai Pegawai) (err error)
 }

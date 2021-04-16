@@ -43,3 +43,12 @@ func (u *pegawaiUsecase) Store(c context.Context, pegawai *domain.Pegawai) (err 
 
 	return
 }
+
+func (u *pegawaiUsecase) Update(c context.Context, pegawai domain.Pegawai) (err error) {
+	ctx, cancel := context.WithTimeout(c, u.Timeout)
+	defer cancel()
+
+	err = u.Repository.Update(ctx, pegawai)
+
+	return
+}
