@@ -6,6 +6,10 @@ import (
 	"github.com/novriyantoAli/go-phc/domain"
 )
 
+type ResponseErrorMessage struct {
+	Message string `json:"error"`
+}
+
 // TranslateError ...
 func TranslateError(err error) int {
 	switch err {

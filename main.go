@@ -23,6 +23,10 @@ import (
 	_pegawaiHandler "github.com/novriyantoAli/go-phc/pegawai/delivery/http"
 	_pegawaiRepository "github.com/novriyantoAli/go-phc/pegawai/repository/mysql"
 	_pegawaiUsecase "github.com/novriyantoAli/go-phc/pegawai/usecase"
+
+	_absenHandler "github.com/novriyantoAli/go-phc/absen/delivery/http"
+	_absenRepository "github.com/novriyantoAli/go-phc/absen/repository/mysql"
+	_absenUsecase "github.com/novriyantoAli/go-phc/absen/usecase"
 )
 
 type responseError struct {
@@ -107,18 +111,21 @@ func main() {
 	 */
 	usersRepository := _usersRepository.NewMysqlRepository(dbConn)
 	pegawaiRepository := _pegawaiRepository.NewMysqlRepository(dbConn)
+	absenRepository := _absenRepository.NewMysqlRepository(dbConn)
 
 	/**
 	 * Defined Application Usecase
 	 */
 	usersUsecase := _usersUsecase.NewUsecase(timeout, usersRepository)
 	pegawaiUsecase := _pegawaiUsecase.NewUsecase(timeout, pegawaiRepository)
+	absenUsecase := _absenUsecase.NewUsecase(timeout, absenRepository)
 
 	/**
 	 * Call all Handler here
 	 */
 	_usersHandler.NewHandler(e, usersUsecase)
 	_pegawaiHandler.NewHandler(e, pegawaiUsecase)
+	_absenHandler.NewHandler(e, absenUsecase)
 
 	/**
 	 * Call Echo Framework function for run this app

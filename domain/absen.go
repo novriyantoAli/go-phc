@@ -36,8 +36,15 @@ type RiwayatKehadiran struct {
 
 type AbsenRepository interface {
 	Find(ctx context.Context, absen Absen) (res Absen, err error)
-	Search(ctx context.Context, absen Absen) (res Absen, err error)
+	Search(ctx context.Context, absen Absen) (res []Absen, err error)
 	Insert(ctx context.Context, absen *Absen) (err error)
 	Update(ctx context.Context, absen *Absen) (err error)
 	Delete(ctx context.Context, id int64) (err error)
+}
+
+type AbsenUsecase interface {
+	GroupIDPegawai(c context.Context, idPegawai int64) (res []Absen, err error)
+	Update(c context.Context, absen *Absen) (err error)
+	Store(c context.Context, absen *Absen) (err error)
+	Delete(c context.Context, id int64) (res Absen, err error)
 }
