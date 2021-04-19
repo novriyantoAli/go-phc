@@ -14,6 +14,11 @@ type ResponseError struct {
 	Message string `json:"error"`
 }
 
+type login struct {
+	Nik      string `json:"nik" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
+
 type usersHandler struct {
 	ucase domain.UsersUsecase
 }
@@ -39,18 +44,18 @@ func NewHandler(e *echo.Echo, uc domain.UsersUsecase) {
 // Login ...
 func (hn *usersHandler) Login(e echo.Context) error {
 	// get query param
-	nik := e.FormValue("nik")
-	password := e.FormValue("password")
-
-	if nik == "" {
-		return e.JSON(http.StatusFailedDependency, ResponseError{Message: "nik required..."})
+	u := new(login)
+	err := e.Bind(u)
+	if err != nil {
+		logrus.Error(err)
+		return e.JSON(http.StatusFailedDependency, ResponseError{Message: err.Error()})
 	}
 
-	if password == "" {
-		return e.JSON(http.StatusFailedDependency, ResponseError{Message: "password required..."})
+	if err := e.Validate(u); err != nil {
+		return e.JSON(http.StatusFailedDependency, ResponseError{Message: err.Error()})
 	}
 
-	res, err := hn.ucase.Login(e.Request().Context(), nik, password)
+	res, err := hn.ucase.Login(e.Request().Context(), u.Nik, u.Password)
 	if err != nil {
 		logrus.Error(err)
 		return e.JSON(helper.TranslateError(err), ResponseError{Message: err.Error()})

@@ -2,10 +2,10 @@ version: '3'
 services:
   mysqldb:
     image: mysql:5.7
-    container_name: mysqldb_go_phc
+    container_name: proyek_mysql
     ports:
-      - 9922:3306
+      - 3306:3306
     # [public]:[local]
     environment:
-      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_ROOT_PASSWORD: toor
       MYSQL_DATABASE: db_phc

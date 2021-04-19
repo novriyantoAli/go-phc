@@ -11,8 +11,10 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gopkg.in/go-playground/validator.v9"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -31,6 +33,14 @@ import (
 
 type responseError struct {
 	Message string `json:"error"`
+}
+
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
 }
 
 func init() {
@@ -100,10 +110,19 @@ func main() {
 
 	e := echo.New()
 
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"OPTIONS", "GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders: []string{"Content-Type", "X-CSRF-Token", "application/json"},
+		Debug:          true,
+	})
+	e.Use(echo.WrapMiddleware(corsMiddleware.Handler))
+
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
-
+	e.Validator = &CustomValidator{validator: validator.New()}
+	
 	timeout := time.Duration(viper.GetInt("context.timeout")) * time.Second
 
 	/**
