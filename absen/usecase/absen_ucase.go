@@ -22,9 +22,9 @@ func (u *absenUsecase) GroupIDPegawai(c context.Context, idPegawai int64) (res [
 	defer cancel()
 
 	absen := domain.Absen{}
-	absen.ID = &idPegawai
+	absen.IDPegawai = &idPegawai
 
-	res, err = u.Repository.Search(ctx, absen)
+	res, err = u.Repository.Find(ctx, absen)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -60,15 +60,15 @@ func (u *absenUsecase) Delete(c context.Context, id int64) (res domain.Absen, er
 	absen := domain.Absen{}
 	absen.ID = &id
 
-	res, err = u.Repository.Find(ctx, absen)
+	resArr, err := u.Repository.Find(ctx, absen)
 	if err != nil {
 		logrus.Error(err)
 		return
 	}
 
-	if res == (domain.Absen{}) {
+	if len(resArr) <= 0 {
 		logrus.Error("item not found")
-		return res, domain.ErrNotFound
+		return domain.Absen{}, domain.ErrNotFound
 	}
 
 	err = u.Repository.Delete(ctx, id)
@@ -77,5 +77,5 @@ func (u *absenUsecase) Delete(c context.Context, id int64) (res domain.Absen, er
 		return domain.Absen{}, err
 	}
 
-	return res, nil
+	return resArr[0], nil
 }

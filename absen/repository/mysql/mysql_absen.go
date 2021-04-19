@@ -49,7 +49,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 	return
 }
 
-func (m *mysqlRepository) Find(ctx context.Context, absen domain.Absen) (res domain.Absen, err error) {
+func (m *mysqlRepository) Find(ctx context.Context, absen domain.Absen) (res []domain.Absen, err error) {
 	query := "SELECT * FROM absen "
 	args := make([]interface{}, 0)
 	addWhere := false
@@ -96,13 +96,9 @@ func (m *mysqlRepository) Find(ctx context.Context, absen domain.Absen) (res dom
 		args = append(args, *absen.Keterangan)
 	}
 
-	resArr, err := m.fetch(ctx, query, args...)
+	res, err = m.fetch(ctx, query, args...)
 	if err != nil {
 		logrus.Error(err)
-	}
-
-	if len(resArr) > 0 {
-		return resArr[0], nil
 	}
 
 	return
@@ -110,7 +106,6 @@ func (m *mysqlRepository) Find(ctx context.Context, absen domain.Absen) (res dom
 
 func (m *mysqlRepository) Search(ctx context.Context, absen domain.Absen) (res []domain.Absen, err error) {
 	query := "SELECT * FROM absen "
-	args := make([]interface{}, 0)
 
 	containsOpen := "'%"
 	containsClose := "%'"
@@ -119,44 +114,42 @@ func (m *mysqlRepository) Search(ctx context.Context, absen domain.Absen) (res [
 	if absen.ID != nil {
 		if !addWhere {
 			addWhere = true
-			query += " WHERE id LIKE ? "
+			query += " WHERE id LIKE " + containsOpen + strconv.FormatInt(*absen.ID, 10) + containsClose + " "
 		} else {
-			query += " OR id LIKE ? "
+			query += " OR id LIKE " + containsOpen + strconv.FormatInt(*absen.ID, 10) + containsClose + " "
 		}
-		args = append(args, containsOpen+strconv.FormatInt(*absen.ID, 10)+containsClose)
 	}
 
 	if absen.IDPegawai != nil {
 		if !addWhere {
 			addWhere = true
-			query += " WHERE id_pegawai LIKE ? "
+			query += " WHERE id_pegawai LIKE " + containsOpen + strconv.FormatInt(*absen.IDPegawai, 10) + containsClose
 		} else {
-			query += " OR id_pegawai LIKE ? "
+			query += " OR id_pegawai LIKE " + containsOpen + strconv.FormatInt(*absen.IDPegawai, 10) + containsClose
 		}
-		args = append(args, containsOpen+strconv.FormatInt(*absen.ID, 10)+containsClose)
 	}
 
 	if absen.Tipe != nil {
 		if !addWhere {
 			addWhere = true
-			query += " WHERE tipe LIKE ? "
+			query += " WHERE tipe LIKE " + containsOpen + *absen.Tipe + containsClose + " "
 		} else {
-			query += " OR tipe LIKE ? "
+			query += " OR tipe LIKE " + containsOpen + *absen.Tipe + containsClose + " "
 		}
-		args = append(args, containsOpen+*absen.Tipe+containsClose)
 	}
 
 	if absen.Keterangan != nil {
 		if !addWhere {
 			addWhere = true
-			query += " WHERE keterangan LIKE ? "
+			query += " WHERE keterangan LIKE " + containsOpen + *absen.Keterangan + containsClose
 		} else {
-			query += " OR keterangan LIKE ? "
+			query += " OR keterangan LIKE " + containsOpen + *absen.Keterangan + containsClose
 		}
-		args = append(args, containsOpen+*absen.Keterangan+containsClose)
 	}
 
-	res, err = m.fetch(ctx, query, args...)
+	fmt.Println("query: ", query)
+
+	res, err = m.fetch(ctx, query)
 	if err != nil {
 		logrus.Error(err)
 	}

@@ -431,7 +431,7 @@ func (m *mysqlRepository) Search(ctx context.Context, pegawai domain.Pegawai) (r
 }
 
 // Find(ctx context.Context, pegawai Pegawai) (res Pegawai, err error)
-func (m *mysqlRepository) Find(ctx context.Context, pegawai domain.Pegawai) (res domain.Pegawai, err error) {
+func (m *mysqlRepository) Find(ctx context.Context, pegawai domain.Pegawai) (res []domain.Pegawai, err error) {
 	query := `SELECT * FROM pegawai `
 	args := make([]interface{}, 0)
 
@@ -477,17 +477,13 @@ func (m *mysqlRepository) Find(ctx context.Context, pegawai domain.Pegawai) (res
 		args = append(args, *pegawai.NamaPanggilan)
 	}
 
-	resArr, err := m.fetch(ctx, query, args...)
+	res, err = m.fetch(ctx, query, args...)
 	if err != nil {
 		logrus.Error(err)
-		return domain.Pegawai{}, err
+		return nil, err
 	}
 
-	if len(resArr) > 0 {
-		return resArr[0], nil
-	}
-
-	return domain.Pegawai{}, domain.ErrBadParamInput
+	return
 }
 
 // Insert(ctx context.Context, pegawai *Pegawai) (err error)

@@ -17,12 +17,14 @@ func NewUsecase(timeout time.Duration, r domain.PegawaiRepository) domain.Pegawa
 	return &pegawaiUsecase{Timeout: timeout, Repository: r}
 }
 
-func (u *pegawaiUsecase) Get(c context.Context, nik string) (res domain.Pegawai, err error) {
+func (u *pegawaiUsecase) Get(c context.Context, nik string) (res []domain.Pegawai, err error) {
 	ctx, cancel := context.WithTimeout(c, u.Timeout)
 	defer cancel()
 
 	pegawai := domain.Pegawai{}
-	pegawai.NIK = &nik
+	if nik != "" {
+		pegawai.NIK = &nik	
+	}
 
 	res, err = u.Repository.Find(ctx, pegawai)
 	if err != nil {
@@ -60,9 +62,14 @@ func (u *pegawaiUsecase) Delete(c context.Context, id int64) (res domain.Pegawai
 	tempPeg := domain.Pegawai{}
 	tempPeg.ID = &id
 
-	res, err = u.Repository.Find(ctx, tempPeg)
+	resArr, err := u.Repository.Find(ctx, tempPeg)
 	if err != nil {
 		logrus.Error(err)
+		return
+	}
+
+	if len(resArr) <= 0 {
+		logrus.Error("item not found")
 		return
 	}
 

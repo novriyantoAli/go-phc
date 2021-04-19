@@ -35,7 +35,7 @@ type RiwayatKehadiran struct {
 }
 
 type AbsenRepository interface {
-	Find(ctx context.Context, absen Absen) (res Absen, err error)
+	Find(ctx context.Context, absen Absen) (res []Absen, err error)
 	Search(ctx context.Context, absen Absen) (res []Absen, err error)
 	Insert(ctx context.Context, absen *Absen) (err error)
 	Update(ctx context.Context, absen *Absen) (err error)

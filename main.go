@@ -113,7 +113,7 @@ func main() {
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"OPTIONS", "GET", "POST", "PUT", "DELETE"},
-		AllowedHeaders: []string{"Content-Type", "X-CSRF-Token", "application/json"},
+		AllowedHeaders: []string{"*"},
 		Debug:          true,
 	})
 	e.Use(echo.WrapMiddleware(corsMiddleware.Handler))
@@ -122,7 +122,7 @@ func main() {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
 	e.Validator = &CustomValidator{validator: validator.New()}
-	
+
 	timeout := time.Duration(viper.GetInt("context.timeout")) * time.Second
 
 	/**

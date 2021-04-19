@@ -54,14 +54,14 @@ type Pegawai struct {
 
 type PegawaiRepository interface {
 	Search(ctx context.Context, pegawai Pegawai) (res []Pegawai, err error)
-	Find(ctx context.Context, pegawai Pegawai) (res Pegawai, err error)
+	Find(ctx context.Context, pegawai Pegawai) (res []Pegawai, err error)
 	Insert(ctx context.Context, pegawai *Pegawai) (err error)
 	Update(ctx context.Context, pegawai Pegawai) (err error)
 	Delete(ctx context.Context, id int64) (err error)
 }
 
 type PegawaiUsecase interface {
-	Get(c context.Context, nik string) (res Pegawai, err error)
+	Get(c context.Context, nik string) (res []Pegawai, err error)
 	Store(c context.Context, pegawai *Pegawai) (err error)
 	Update(c context.Context, pegawai Pegawai) (err error)
 	Delete(c context.Context, id int64) (res Pegawai, err error)
