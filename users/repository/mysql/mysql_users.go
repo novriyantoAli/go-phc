@@ -188,7 +188,6 @@ func (m *mysqlRepository) Update(ctx context.Context, user domain.Users) (err er
 	err = tx.Commit()
 	if err != nil {
 		logrus.Error(err)
-		return err
 	}
 
 	return
