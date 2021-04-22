@@ -110,7 +110,7 @@ func (m *mysqlRepository) Search(ctx context.Context, user domain.Users) (res []
 }
 
 // 	Find(ctx context.Context, user Users) (res Users, err error)
-func (m *mysqlRepository) Find(ctx context.Context, user domain.Users) (res domain.Users, err error) {
+func (m *mysqlRepository) Find(ctx context.Context, user domain.Users) (res []domain.Users, err error) {
 	query := `SELECT * FROM users `
 	args := make([]interface{}, 0)
 
@@ -156,16 +156,12 @@ func (m *mysqlRepository) Find(ctx context.Context, user domain.Users) (res doma
 		args = append(args, *user.Level)
 	}
 
-	resArr, err := m.fetch(ctx, query, args...)
+	res, err = m.fetch(ctx, query, args...)
 	if err != nil {
-		return domain.Users{}, err
+		logrus.Error(err)
 	}
 
-	if len(resArr) > 0 {
-		return resArr[0], nil
-	}
-
-	return domain.Users{}, domain.ErrBadParamInput
+	return
 }
 
 // Update(ctx context.Context, user Users) (res Users, err error)
@@ -251,7 +247,7 @@ func (m *mysqlRepository) Delete(ctx context.Context, id int64) (err error) {
 	}
 
 	if rowsAffected != 1 {
-		err = fmt.Errorf("Weird  Behavior. Total Affected: %d", rowsAffected)
+		err = fmt.Errorf("weird  Behavior. Total Affected: %d", rowsAffected)
 		logrus.Error(err)
 		return
 	}

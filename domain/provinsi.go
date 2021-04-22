@@ -2,8 +2,8 @@ package domain
 
 import (
 	"context"
-	"time")
-
+	"time"
+)
 
 type Provinsi struct {
 	ID           *int64     `json:"id"`
@@ -13,8 +13,13 @@ type Provinsi struct {
 
 type ProvinsiRepository interface {
 	Get(ctx context.Context, provinsi Provinsi) (res []Provinsi, err error)
-	Search(ctx context.Context, provinsi Provinsi)(res []Provinsi, err error)
-	Insert(ctx context.Context, provinsi *Provinsi)(err error)
-	Update(ctx context.Context, provinsi *Provinsi)(err error)
-	Delete(ctx context.Context, id int64)(err error)
+	Search(ctx context.Context, provinsi Provinsi) (res []Provinsi, err error)
+	Insert(ctx context.Context, provinsi *Provinsi) (err error)
+	Update(ctx context.Context, provinsi *Provinsi) (err error)
+	Delete(ctx context.Context, id int64) (err error)
+}
+
+type ProvinsiUsecase interface {
+	Get(c context.Context, id int64) (res []Provinsi, err error)
+	Search(c context.Context, nama string) (res []Provinsi, err error)
 }

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -67,6 +68,8 @@ func (uc *usersUsecase) Login(c context.Context, nik string, password string) (r
 	ctx, cancel := context.WithTimeout(c, uc.Timeout)
 	defer cancel()
 
+	fmt.Println("password: ", hashAndSalt([]byte(password)))
+
 	user := domain.Users{}
 	user.NIK = &nik
 
@@ -76,18 +79,20 @@ func (uc *usersUsecase) Login(c context.Context, nik string, password string) (r
 		return domain.JWTCustomClaims{}, err
 	}
 
-	if resUser == (domain.Users{}) {
-		return domain.JWTCustomClaims{}, domain.ErrBadParamInput
+	if len(resUser) != 1 {
+		logrus.Error("weird behaviour for result items")
+		err = domain.ErrInvalidCredentials
+		return domain.JWTCustomClaims{}, err
 	}
 
-	if !comparePasswords(*resUser.Password, []byte(password)) {
-		return domain.JWTCustomClaims{}, domain.ErrBadParamInput
+	if !comparePasswords(*resUser[0].Password, []byte(password)) {
+		return domain.JWTCustomClaims{}, domain.ErrInvalidCredentials
 	}
 
 	claims := domain.JWTCustomClaims{
-		NIK:   *resUser.NIK,
-		ID:    *resUser.ID,
-		Level: *resUser.Level,
+		NIK:   *resUser[0].NIK,
+		ID:    *resUser[0].ID,
+		Level: *resUser[0].Level,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
 		},

@@ -29,6 +29,14 @@ import (
 	_absenHandler "github.com/novriyantoAli/go-phc/absen/delivery/http"
 	_absenRepository "github.com/novriyantoAli/go-phc/absen/repository/mysql"
 	_absenUsecase "github.com/novriyantoAli/go-phc/absen/usecase"
+
+	_provinsiHandler "github.com/novriyantoAli/go-phc/provinsi/delivery/http"
+	_provinsiRepository "github.com/novriyantoAli/go-phc/provinsi/repository/mysql"
+	_provinsiUsecase "github.com/novriyantoAli/go-phc/provinsi/usecase"
+
+	_kabupatenHandler "github.com/novriyantoAli/go-phc/kabupaten/delivery/http"
+	_kabupatenRepository "github.com/novriyantoAli/go-phc/kabupaten/repository/mysql"
+	_kabupatenUsecase "github.com/novriyantoAli/go-phc/kabupaten/usecase"
 )
 
 type responseError struct {
@@ -131,6 +139,8 @@ func main() {
 	usersRepository := _usersRepository.NewMysqlRepository(dbConn)
 	pegawaiRepository := _pegawaiRepository.NewMysqlRepository(dbConn)
 	absenRepository := _absenRepository.NewMysqlRepository(dbConn)
+	provinsiRepository := _provinsiRepository.NewRepository(dbConn)
+	kabupatenRepository := _kabupatenRepository.NewMysqlRepository(dbConn)
 
 	/**
 	 * Defined Application Usecase
@@ -138,6 +148,8 @@ func main() {
 	usersUsecase := _usersUsecase.NewUsecase(timeout, usersRepository)
 	pegawaiUsecase := _pegawaiUsecase.NewUsecase(timeout, pegawaiRepository)
 	absenUsecase := _absenUsecase.NewUsecase(timeout, absenRepository)
+	provinsiUsecase := _provinsiUsecase.NewUsecase(timeout, provinsiRepository)
+	kabupatenUsecase := _kabupatenUsecase.NewUsecase(timeout, kabupatenRepository)
 
 	/**
 	 * Call all Handler here
@@ -145,6 +157,8 @@ func main() {
 	_usersHandler.NewHandler(e, usersUsecase)
 	_pegawaiHandler.NewHandler(e, pegawaiUsecase)
 	_absenHandler.NewHandler(e, absenUsecase)
+	_provinsiHandler.NewHandler(e, provinsiUsecase)
+	_kabupatenHandler.NewHandler(e, kabupatenUsecase)
 
 	/**
 	 * Call Echo Framework function for run this app

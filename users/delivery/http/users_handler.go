@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"github.com/novriyantoAli/go-phc/domain"
 	"github.com/novriyantoAli/go-phc/helper"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 // ResponseError ...
@@ -27,13 +29,14 @@ type usersHandler struct {
 func NewHandler(e *echo.Echo, uc domain.UsersUsecase) {
 	handler := &usersHandler{ucase: uc}
 
-	// isLoggedIn := middleware.JWTWithConfig(middleware.JWTConfig{
-	// 	SigningKey: []byte(viper.GetString(`server.secret`)),
-	// })
+	isLoggedIn := middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey: []byte(viper.GetString(`server.secret`)),
+	})
 
 	e.POST("/api/login", handler.Login)
 
-	// group := e.Group("/api/users", isLoggedIn)
+	group := e.Group("/api/users", isLoggedIn)
+	group.POST("/register", handler.Register)
 	// group.GET("", handler.Fetch)
 	// group.POST("", handler.Save)
 	// group.POST("/find", handler.Find)
@@ -52,6 +55,7 @@ func (hn *usersHandler) Login(e echo.Context) error {
 	}
 
 	if err := e.Validate(u); err != nil {
+		logrus.Error(err)
 		return e.JSON(http.StatusFailedDependency, ResponseError{Message: err.Error()})
 	}
 
@@ -62,4 +66,8 @@ func (hn *usersHandler) Login(e echo.Context) error {
 	}
 
 	return e.JSON(http.StatusOK, res)
+}
+
+func (h *usersHandler) Register(e echo.Context) error {
+	return e.JSON(http.StatusAccepted, helper.ResponseErrorMessage{Message: "under develop"})
 }

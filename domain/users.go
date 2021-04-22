@@ -14,7 +14,7 @@ type Users struct {
 
 // UsersRepository ...
 type UsersRepository interface {
-	Find(ctx context.Context, user Users) (res Users, err error)
+	Find(ctx context.Context, user Users) (res []Users, err error)
 	Search(ctx context.Context, user Users) (res []Users, err error)
 	Insert(ctx context.Context, user *Users) (err error)
 	Update(ctx context.Context, user Users) (err error)

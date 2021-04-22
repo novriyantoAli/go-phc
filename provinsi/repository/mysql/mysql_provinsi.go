@@ -18,14 +18,13 @@ func NewRepository(conn *sql.DB) domain.ProvinsiRepository {
 }
 
 func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...interface{}) (res []domain.Provinsi, err error) {
-	rows, err := m.Conn.QueryContext(ctx, query, args)
+	rows, err := m.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
 	defer rows.Close()
 
-	provinsis := make([]domain.Provinsi, 0)
 	for rows.Next() {
 		provinsi := domain.Provinsi{}
 		err = rows.Scan(
@@ -38,8 +37,9 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			return nil, err
 		}
 
-		provinsis = append(provinsis, provinsi)
+		res = append(res, provinsi)
 	}
+
 	return
 }
 
