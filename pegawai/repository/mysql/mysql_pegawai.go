@@ -102,6 +102,7 @@ func (m *mysqlRepository) fetch(ctx context.Context, query string, args ...inter
 			err = rowsKeluarga.Scan(
 				&kg.ID,
 				&kg.IDPegawai,
+				&kg.Nama,
 				&kg.TipeHubungan,
 				&kg.JenisKelamin,
 				&kg.TanggalLahir,
